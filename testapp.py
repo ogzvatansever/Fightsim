@@ -1,3 +1,4 @@
+#Test app currently
 class Fighter :
 
     def __init__(self, nickname, agility, strength, stamina,) :
