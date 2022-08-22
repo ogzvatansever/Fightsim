@@ -4,11 +4,23 @@ import random
 
 class Fighter :
 
-    def __init__(self, nickname, agility, strength, stamina,) :
+    def __init__(self, nickname, agility, strength, toughness, stamina, health) :
         self.nickname = nickname
-        self.agility = 1.0 + agility
-        self.strength = 1.0 + strength
-        self.stamina = 1.0 + stamina
+        self.agility = agility #
+        self.strength = strength #
+        self.toughness = toughness #
+        self.stamina = stamina #
+        self.health = health #
 
-    def printStats(self):
-        print(self.nickname,self.agility,self.strength,self.stamina)
+    def printStats(self) :
+        print(self.nickname,self.agility,self.strength,self.toughness,self.stamina)
+
+def test() : # This function creates stats for a fighter
+    stats = [random.randint(1, 10),random.randint(1, 10),random.randint(1, 10),random.randint(1, 10),random.randint(1, 10)]
+    print(stats)
+
+def simFight(fighter1, fighter2) :
+    pass
+
+def simRound() :
+    pass
