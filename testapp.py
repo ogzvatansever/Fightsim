@@ -15,9 +15,13 @@ class Fighter :
     def printStats(self) :
         print(self.nickname,self.agility,self.strength,self.toughness,self.stamina)
 
-def test() : # This function creates stats for a fighter
+def createStats() : # This function creates stats for a fighter by choosing a number from 1-10 but it cannot exceed 40 total
     stats = [random.randint(1, 10),random.randint(1, 10),random.randint(1, 10),random.randint(1, 10),random.randint(1, 10)]
-    print(stats)
+    while sum(stats) > 40 :
+        for i in range(len(stats)) :
+            if stats[i] > 1 :
+                stats[i] -= 1
+    return stats
 
 def simFight(fighter1, fighter2) :
     pass
