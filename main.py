@@ -15,6 +15,19 @@ class Fighter :
     def printStats(self) :
         print(self.nickname,self.agility,self.strength,self.toughness,self.stamina)
 
+class convertStats : # Converts character stats to in game stats
+
+    def __init__(self,infighter) :
+        self.crit = 0.1+0.02*infighter.agility
+        self.dodge = 0.1+0.02*infighter.agility+0.01*infighter.stamina
+        self.power = 0.5+0.1*infighter.strength
+        self.defence = 0.04*infighter.toughness
+        self.energy = 50+10*infighter.stamina
+        self.hp = 100+10*infighter.health
+
+    def stats(self) :
+        print(self.crit,self.dodge,self.power,self.defence,self.energy,self.hp)
+
 def createStats() : # This function creates stats for a fighter by choosing a number from 1-10 but it cannot exceed 40 total
     stats = [random.randint(1, 10),random.randint(1, 10),random.randint(1, 10),random.randint(1, 10),random.randint(1, 10)]
     while sum(stats) > 40 :
