@@ -15,7 +15,12 @@ class Fighter :
         self.star = int((agility+strength+toughness+stamina+health) / 10)
 
     def printStats(self) :
-        print(self.nickname,self.record,self.agility,self.strength,self.toughness,self.stamina,self.health,self.star)
+        print (self.nickname,"Record:",self.record,self.star,"*","\n")
+        print ("{:<11} {:<2} {:<10}".format('Agility:',self.agility,levelDisplay(self.agility)))
+        print ("{:<11} {:<2} {:<10}".format("Strength:",self.strength,levelDisplay(self.strength)))
+        print ("{:<11} {:<2} {:<10}".format("Toughness:",self.toughness,levelDisplay(self.toughness)))
+        print ("{:<11} {:<2} {:<10}".format("Stamina:",self.stamina,levelDisplay(self.stamina)))
+        print ("{:<11} {:<2} {:<10}".format("Health:",self.health,levelDisplay(self.health)))
 
 
 
