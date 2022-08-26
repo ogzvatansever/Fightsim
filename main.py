@@ -50,6 +50,20 @@ def createStats() : # This function creates stats for a fighter by choosing a nu
 
 
 
+def levelDisplay(inputstat) :
+    tempvar = ""
+    for i in range(0,inputstat) :
+        tempvar += "*"
+    return tempvar
+
+
+
+def createFighter(nickname) :
+    temp_stats = createStats()
+    return Fighter(nickname, temp_stats[0], temp_stats[1], temp_stats[2], temp_stats[3], temp_stats[4])
+
+
+
 def record(fighter,result) :
     turn = 0
     win = ""
@@ -136,9 +150,6 @@ def simRound() :
 
 if __name__ == "__main__" :
     
-    testfighter1_stats = createStats()
-    testfighter1 = Fighter("Test Fighter 1", testfighter1_stats[0], testfighter1_stats[1], testfighter1_stats[2], testfighter1_stats[3], testfighter1_stats[4])
-    testfighter2_stats = createStats()
-    testfighter2 = Fighter("Test Fighter 2", testfighter2_stats[0], testfighter2_stats[1], testfighter2_stats[2], testfighter2_stats[3], testfighter2_stats[4])
-    
+    testfighter1 = createFighter("TestFighter1")
+    testfighter2 = createFighter("TestFighter2")
     simFight(testfighter1,testfighter2)
