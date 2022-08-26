@@ -4,16 +4,18 @@ import random
 
 class Fighter :
 
-    def __init__(self, nickname, agility, strength, toughness, stamina, health) :
+    def __init__(self, nickname, agility, strength, toughness, stamina, health, record="0-0") :
         self.nickname = nickname
         self.agility = agility #
         self.strength = strength #
         self.toughness = toughness #
         self.stamina = stamina #
         self.health = health #
+        self.record = record 
+        self.star = int((agility+strength+toughness+stamina+health) / 10)
 
     def printStats(self) :
-        print(self.nickname,self.agility,self.strength,self.toughness,self.stamina)
+        print(self.nickname,self.record,self.agility,self.strength,self.toughness,self.stamina,self.health,self.star)
 
 
 
@@ -27,6 +29,7 @@ class convertStats : # Converts character stats to in game stats
         self.defence = 0.04*infighter.toughness
         self.energy = 50+10*infighter.stamina
         self.hp = 100+10*infighter.health
+        self.record = infighter.record
 
     def damage(self, hit, target) :
         target.hp -= hit
@@ -44,6 +47,29 @@ def createStats() : # This function creates stats for a fighter by choosing a nu
             if stats[i] > 1 :
                 stats[i] -= 1
     return stats
+
+
+
+def record(fighter,result) :
+    turn = 0
+    win = ""
+    loss = ""
+    for i in fighter.record :
+        if i == "-" :
+            turn += 1
+            continue
+        if turn == 0 :
+            win += i
+        else :
+            loss += i
+    
+    if result == "w" :
+        win = int(win)+1
+
+    elif result == "l" :
+        loss = int(loss)+1
+
+    return str(win)+"-"+str(loss)
 
 
 
@@ -88,10 +114,16 @@ def simFight(tempfighter1, tempfighter2) :
         fighter2.damage(calHit(fighter2, fighter1),fighter1)
         fighter2.energy += 5
 
+    print("\n")
+
     if fighter1.hp > fighter2.hp :
-        print("\n",fighter1.nickname, "won the fight!")
+        tempfighter1.record = record(tempfighter1,"w")
+        tempfighter2.record = record(tempfighter2,"l")
+        print(fighter1.nickname, "won the fight!")
     else:
-        print("\n",fighter2.nickname, "won the fight!")
+        tempfighter2.record = record(tempfighter2,"w")
+        tempfighter1.record = record(tempfighter1,"l")
+        print(fighter2.nickname, "won the fight!")
     
     print("The fight took", turn_counter, "turns.")
 
