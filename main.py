@@ -37,8 +37,9 @@ class convertStats : # Converts character stats to in game stats
         self.record = infighter.record
 
     def damage(self, hit, target) :
-        target.hp -= hit
-        print(target.nickname,"took", int(hit), "damage.")
+        if hit != 0 :
+            target.hp -= hit
+            print(target.nickname,"took", int(hit), "damage.")
 
     def stats(self) :
         return self.crit,self.dodge,self.power,self.defence,self.energy,self.hp
@@ -98,18 +99,21 @@ def calHit(fighter1,fighter2) :
 
         crit_cal = random.randint(1,100)
         if fighter1.crit*100 >= crit_cal :
+            print("Critical damage!")
             fighter2.energy -= 30
             return 10*2*fighter1.power
         
         else :
             dodge_cal = random.randint(1,100)
-            if fighter2.dodge >= dodge_cal :
+            if fighter2.dodge*100 >= dodge_cal :
+                print(fighter2.nickname,"dodged the hit!")
                 return 0
             
             else :
                 block_cal = random.randint(1,100)
-                if fighter2.defence >= block_cal :
+                if fighter2.defence*100 >= block_cal :
                     fighter2.energy += 15
+                    print("Hit blocked!")
                     return 10*0.2*fighter1.power
                 
                 else :
@@ -117,6 +121,7 @@ def calHit(fighter1,fighter2) :
                     return 10*fighter1.power
 
     else :
+        print(fighter1.nickname,"resting")
         fighter1.energy += 15
         return 0
 
@@ -126,7 +131,7 @@ def simFight(tempfighter1, tempfighter2) :
     fighter1 = convertStats(tempfighter1)
     fighter2 = convertStats(tempfighter2)
     turn_counter = 0
-    while fighter1.hp >= 0 and fighter2.hp >= 0 :
+    while fighter1.hp > 0 and fighter2.hp > 0 :
         turn_counter += 1
         fighter1.damage(calHit(fighter1, fighter2),fighter2)
         fighter1.energy += 5
