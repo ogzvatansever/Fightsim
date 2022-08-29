@@ -1,4 +1,7 @@
 import random
+import sqlite3
+
+#con = sqlite3.connect("database.db")
 
 # Will make a fighter database later
 
