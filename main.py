@@ -1,7 +1,9 @@
 import random
 import sqlite3
 
-#con = sqlite3.connect("database.db")
+con = sqlite3.connect("database.db")
+cur = con.cursor()
+
 
 # Will make a fighter database later
 
@@ -46,6 +48,18 @@ class convertStats : # Converts character stats to in game stats
 
     def stats(self) :
         return self.crit,self.dodge,self.power,self.defence,self.energy,self.hp
+
+
+
+def saveFighter(fighter) : #Creates a database entry for fighter
+    cur.execute("INSERT INTO Fighter (agility, strength, toughness, stamina, health, record, star) VALUES (?, ?, ?, ?, ?, ?, ?)",(fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.star))
+    con.commit()
+    con.close()
+
+
+
+def updateFighter(fighter) :
+    pass
 
 
 
