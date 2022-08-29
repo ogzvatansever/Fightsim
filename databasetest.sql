@@ -1,6 +1,6 @@
 Table Fighter {
   id int PK
-  agility varchar
+  agility int
   strength int
   toughness int
   stamina int

@@ -4,6 +4,11 @@ import sqlite3
 con = sqlite3.connect("database.db")
 cur = con.cursor()
 
+def cagir() :
+    #cur.execute("DROP TABLE Fighter")
+    cur.execute("CREATE TABLE Fighter (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, agility int, strength int, toughness int, stamina int, health int, record varchar, star int)")
+    con.commit()
+    con.close()
 
 # Will make a fighter database later
 
@@ -52,7 +57,7 @@ class convertStats : # Converts character stats to in game stats
 
 
 def saveFighter(fighter) : #Creates a database entry for fighter
-    cur.execute("INSERT INTO Fighter (agility, strength, toughness, stamina, health, record, star) VALUES (?, ?, ?, ?, ?, ?, ?)",(fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.star))
+    cur.execute("INSERT INTO Fighter (nickname, agility, strength, toughness, stamina, health, record, star) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.star))
     con.commit()
     con.close()
 
