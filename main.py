@@ -4,11 +4,20 @@ import sqlite3
 con = sqlite3.connect("database.db")
 cur = con.cursor()
 
-def cagir() :
+#def db(param) :
+#    global con, cur
+#    if param == "o" or "O" :
+#        con = sqlite3.connect("database.db")
+#        cur = con.cursor()
+#        #return con ; cur
+#    elif param == "c" or "C" :
+#        con.commit()
+#        con.close()
+
+def createTable() :
     #cur.execute("DROP TABLE Fighter")
     cur.execute("CREATE TABLE Fighter (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, agility int, strength int, toughness int, stamina int, health int, record varchar, star int)")
     con.commit()
-    con.close()
 
 # Will make a fighter database later
 
@@ -59,7 +68,6 @@ class convertStats : # Converts character stats to in game stats
 def saveFighter(fighter) : #Creates a database entry for fighter
     cur.execute("INSERT INTO Fighter (nickname, agility, strength, toughness, stamina, health, record, star) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.star))
     con.commit()
-    con.close()
 
 
 
@@ -181,7 +189,8 @@ def simRound() :
 
 
 if __name__ == "__main__" :
-    
-    testfighter1 = createFighter("TestFighter1")
-    testfighter2 = createFighter("TestFighter2")
-    simFight(testfighter1,testfighter2)
+    test1 = cur.execute("SELECT * FROM Fighter")
+    test2 = cur.fetchmany(2)
+    fighter1 = Fighter(test2[0][1], test2[0][2], test2[0][3], test2[0][4], test2[0][5], test2[0][6])
+    fighter2 = Fighter(test2[1][1], test2[1][2], test2[1][3], test2[1][4], test2[1][5], test2[1][6])
+    simFight(fighter1, fighter2)
