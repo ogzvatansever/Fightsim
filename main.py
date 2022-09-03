@@ -15,8 +15,9 @@ cur = con.cursor()
 #        con.close()
 
 def createTable() :
+    cur.execute("CREATE TABLE Nicknames (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, firstname varchar, lastname varchar)")
     #cur.execute("DROP TABLE Fighter")
-    cur.execute("CREATE TABLE Fighter (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, agility int, strength int, toughness int, stamina int, health int, record varchar, star int)")
+    #cur.execute("CREATE TABLE Fighter (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, agility int, strength int, toughness int, stamina int, health int, record varchar, star int)")
     con.commit()
 
 # Will make a fighter database later
@@ -189,8 +190,8 @@ def simRound() :
 
 
 if __name__ == "__main__" :
-    test1 = cur.execute("SELECT * FROM Fighter")
-    test2 = cur.fetchmany(2)
+    test1 = cur.execute("SELECT * FROM Fighter ORDER BY RANDOM() LIMIT 2")
+    test2 = cur.fetchall()
     fighter1 = Fighter(test2[0][1], test2[0][2], test2[0][3], test2[0][4], test2[0][5], test2[0][6])
     fighter2 = Fighter(test2[1][1], test2[1][2], test2[1][3], test2[1][4], test2[1][5], test2[1][6])
     simFight(fighter1, fighter2)
