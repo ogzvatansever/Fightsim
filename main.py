@@ -1,5 +1,6 @@
 import random
 import sqlite3
+import names
 
 con = sqlite3.connect("database.db")
 cur = con.cursor()
@@ -64,6 +65,11 @@ class convertStats : # Converts character stats to in game stats
     def stats(self) :
         return self.crit,self.dodge,self.power,self.defence,self.energy,self.hp
 
+
+
+def createNickname(nickname) :
+    out_nickname = f"{names.get_first_name()} '{nickname}' {names.get_last_name()}"
+    return out_nickname
 
 
 def saveFighter(fighter) : #Creates a database entry for fighter
