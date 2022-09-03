@@ -16,12 +16,11 @@ cur = con.cursor()
 #        con.close()
 
 def createTable() :
-    cur.execute("CREATE TABLE Nicknames (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, firstname varchar, lastname varchar)")
+    #cur.execute("CREATE TABLE Nicknames (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, firstname varchar, lastname varchar, fullname varchar)")
+    #cur.execute("DROP TABLE Nicknames")
     #cur.execute("DROP TABLE Fighter")
     #cur.execute("CREATE TABLE Fighter (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, agility int, strength int, toughness int, stamina int, health int, record varchar, star int)")
     con.commit()
-
-# Will make a fighter database later
 
 class Fighter :
 
@@ -68,8 +67,14 @@ class convertStats : # Converts character stats to in game stats
 
 
 def createNickname(nickname) :
-    out_nickname = f"{names.get_first_name()} '{nickname}' {names.get_last_name()}"
-    return out_nickname
+    out_nickname = f'{names.get_first_name()} "{nickname}" {names.get_last_name()}'
+    cur.execute("SELECT EXISTS (SELECT 1 FROM Fighter WHERE nickname = ? LIMIT 1)", (out_nickname,))
+    curcheck = cur.fetchone()
+    if curcheck[0] == 1 :
+        pass
+    else :
+        return out_nickname
+
 
 
 def saveFighter(fighter) : #Creates a database entry for fighter
