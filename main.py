@@ -5,6 +5,15 @@ import names
 con = sqlite3.connect("database.db")
 cur = con.cursor()
 
+
+
+# Future Ideas
+#
+# A function that creates as many fighters as the nickname list has
+# Maybe a nickname generator so i can only say add 50 fighters and it happens
+
+
+
 #def db(param) :
 #    global con, cur
 #    if param == "o" or "O" :
