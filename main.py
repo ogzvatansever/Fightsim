@@ -84,7 +84,8 @@ def saveFighter(fighter) : #Creates a database entry for fighter
 
 
 def updateFighter(fighter) :
-    pass
+    cur.execute("UPDATE Fighter SET nickname=?, agility=?, strength=?, toughness=?, stamina=?, health=?, record=? WHERE nickname=?",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.nickname))
+    con.commit()
 
 
 
@@ -106,6 +107,7 @@ def levelDisplay(inputstat) :
 
 
 
+# Can put the createStats function inside of this function it can be better that way
 def createFighter(nickname) :
     temp_stats = createStats()
     return Fighter(nickname, temp_stats[0], temp_stats[1], temp_stats[2], temp_stats[3], temp_stats[4])
@@ -195,6 +197,7 @@ def simFight(tempfighter1, tempfighter2) :
 
 
 
+# Maybe i'll add multiple round fights later
 def simRound() :
     pass
 
@@ -203,6 +206,6 @@ def simRound() :
 if __name__ == "__main__" :
     test1 = cur.execute("SELECT * FROM Fighter ORDER BY RANDOM() LIMIT 2")
     test2 = cur.fetchall()
-    fighter1 = Fighter(test2[0][1], test2[0][2], test2[0][3], test2[0][4], test2[0][5], test2[0][6])
-    fighter2 = Fighter(test2[1][1], test2[1][2], test2[1][3], test2[1][4], test2[1][5], test2[1][6])
+    fighter1 = Fighter(test2[0][1], test2[0][2], test2[0][3], test2[0][4], test2[0][5], test2[0][6],test2[0][7])
+    fighter2 = Fighter(test2[1][1], test2[1][2], test2[1][3], test2[1][4], test2[1][5], test2[1][6],test2[1][7])
     simFight(fighter1, fighter2)
