@@ -71,7 +71,7 @@ def createNickname(nickname) :
     cur.execute("SELECT EXISTS (SELECT 1 FROM Fighter WHERE nickname = ? LIMIT 1)", (out_nickname,))
     curcheck = cur.fetchone()
     if curcheck[0] == 1 :
-        pass
+        createNickname(nickname)
     else :
         return out_nickname
 
