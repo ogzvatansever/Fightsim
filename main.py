@@ -203,6 +203,8 @@ def simFight(tempfighter1, tempfighter2) :
         tempfighter1.record = record(tempfighter1,"l")
         print(fighter2.nickname, "won the fight!")
     
+    updateFighter(tempfighter1)
+    updateFighter(tempfighter2)
     print("The fight took", turn_counter, "turns.")
 
 
