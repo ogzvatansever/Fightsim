@@ -11,6 +11,7 @@ cur = con.cursor()
 #
 # A function that creates as many fighters as the nickname list has
 # Maybe a nickname generator so i can only say add 50 fighters and it happens
+# Can split the record section the fighter database as Wins and Losses
 
 
 
@@ -210,11 +211,10 @@ def simFight(tempfighter1, tempfighter2) :
 def simRound() :
     pass
 
-
+def pullFighter() :
+    cur.execute("SELECT * FROM Fighter ORDER BY RANDOM() LIMIT 1")
+    tempArray = cur.fetchall()
+    return Fighter(tempArray[0][1], tempArray[0][2], tempArray[0][3], tempArray[0][4], tempArray[0][5], tempArray[0][6],tempArray[0][7])
 
 if __name__ == "__main__" :
-    test1 = cur.execute("SELECT * FROM Fighter ORDER BY RANDOM() LIMIT 2")
-    test2 = cur.fetchall()
-    fighter1 = Fighter(test2[0][1], test2[0][2], test2[0][3], test2[0][4], test2[0][5], test2[0][6],test2[0][7])
-    fighter2 = Fighter(test2[1][1], test2[1][2], test2[1][3], test2[1][4], test2[1][5], test2[1][6],test2[1][7])
-    simFight(fighter1, fighter2)
+    simFight(pullFighter(), pullFighter())
