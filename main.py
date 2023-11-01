@@ -135,6 +135,12 @@ def createFighter(nickname) :
 
 
 
+def createMultipleFighters(amount) :
+    for i in range(1,amount+1) :
+        saveFighter(createFighter(createFighterNickname()))
+
+
+
 def record(fighter,result) :
     turn = 0
     win = ""
@@ -232,4 +238,5 @@ def pullFighter() :
     return Fighter(tempArray[0][1], tempArray[0][2], tempArray[0][3], tempArray[0][4], tempArray[0][5], tempArray[0][6],tempArray[0][7])
 
 if __name__ == "__main__" :
-    simFight(pullFighter(), pullFighter())
+    pass
+    #simFight(pullFighter(), pullFighter())
