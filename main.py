@@ -1,5 +1,6 @@
 import random
 import sqlite3
+import time
 import names
 
 con = sqlite3.connect("database.db")
@@ -76,12 +77,22 @@ class convertStats : # Converts character stats to in game stats
 
 
 
-def createNickname(nickname) :
+def createNickname() :
+    if random.randint(1,2) == 1 :
+        return f"The {random.choice(list(open('Nouns.txt'))).strip().capitalize()}"
+    else :
+        return f"The {random.choice(list(open('Adjectives.txt'))).strip().capitalize()} {random.choice(list(open('Nouns.txt'))).strip().capitalize()}"
+
+
+
+def createFighterNickname(nickname = None) :
+    if nickname is None :
+        nickname = createNickname()
     out_nickname = f'{names.get_first_name()} "{nickname}" {names.get_last_name()}'
     cur.execute("SELECT EXISTS (SELECT 1 FROM Fighter WHERE nickname = ? LIMIT 1)", (out_nickname,))
     curcheck = cur.fetchone()
     if curcheck[0] == 1 :
-        createNickname(nickname)
+        createFighterNickname(nickname)
     else :
         return out_nickname
 
@@ -181,7 +192,7 @@ def calHit(fighter1,fighter2) :
 
 
 
-def simFight(tempfighter1, tempfighter2) :
+def simFight(tempfighter1, tempfighter2, sleep = 0) :
     fighter1 = convertStats(tempfighter1)
     fighter2 = convertStats(tempfighter2)
     turn_counter = 0
@@ -189,8 +200,10 @@ def simFight(tempfighter1, tempfighter2) :
         turn_counter += 1
         fighter1.damage(calHit(fighter1, fighter2),fighter2)
         fighter1.energy += 5
+        time.sleep(sleep)
         fighter2.damage(calHit(fighter2, fighter1),fighter1)
         fighter2.energy += 5
+        time.sleep(sleep)
 
     print("\n")
 
