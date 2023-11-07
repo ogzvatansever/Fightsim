@@ -10,8 +10,6 @@ cur = con.cursor()
 
 # Future Ideas
 #
-# A function that creates as many fighters as the nickname list has
-# Maybe a nickname generator so i can only say add 50 fighters and it happens
 # Can split the record section the fighter database as Wins and Losses
 
 
