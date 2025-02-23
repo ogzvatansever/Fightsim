@@ -1,7 +1,7 @@
 import random
 import sqlite3
 import time
-import names
+#import names
 
 con = sqlite3.connect("database.db")
 cur = con.cursor()
@@ -33,18 +33,19 @@ def createTable() :
 
 class Fighter :
 
-    def __init__(self, nickname, agility, strength, toughness, stamina, health, record="0-0") :
+    def __init__(self, nickname, agility, strength, toughness, stamina, health, win=0, loss=0) :
         self.nickname = nickname
         self.agility = agility #
         self.strength = strength #
         self.toughness = toughness #
         self.stamina = stamina #
         self.health = health #
-        self.record = record 
+        self.win = win
+        self.loss = loss 
         self.star = int((agility+strength+toughness+stamina+health) / 10)
 
     def printStats(self) :
-        print (self.nickname,"Record:",self.record,self.star,"*","\n")
+        print (self.nickname,"Record:",self.win,"-",self.loss,self.star,"*","\n")
         print ("{:<11} {:<2} {:<10}".format('Agility:',self.agility,levelDisplay(self.agility)))
         print ("{:<11} {:<2} {:<10}".format("Strength:",self.strength,levelDisplay(self.strength)))
         print ("{:<11} {:<2} {:<10}".format("Toughness:",self.toughness,levelDisplay(self.toughness)))
@@ -63,7 +64,8 @@ class convertStats : # Converts character stats to in game stats
         self.defence = 0.04*infighter.toughness
         self.energy = 50+10*infighter.stamina
         self.hp = 100+10*infighter.health
-        self.record = infighter.record
+        self.win = infighter.win
+        self.loss = infighter.loss
 
     def damage(self, hit, target) :
         if hit != 0 :
@@ -97,13 +99,13 @@ def createFighterNickname(nickname = None) :
 
 
 def saveFighter(fighter) : #Creates a database entry for fighter
-    cur.execute("INSERT INTO Fighter (nickname, agility, strength, toughness, stamina, health, record, star) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.star))
+    cur.execute("INSERT INTO Fighter (nickname, agility, strength, toughness, stamina, health, star, win, loss) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.star, fighter.win, fighter.loss))
     con.commit()
 
 
 
 def updateFighter(fighter) :
-    cur.execute("UPDATE Fighter SET nickname=?, agility=?, strength=?, toughness=?, stamina=?, health=?, record=? WHERE nickname=?",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.record, fighter.nickname))
+    cur.execute("UPDATE Fighter SET nickname=?, agility=?, strength=?, toughness=?, stamina=?, health=?, win=?, loss=? WHERE nickname=?",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.win, fighter.loss, fighter.nickname))
     con.commit()
 
 
@@ -212,12 +214,14 @@ def simFight(tempfighter1, tempfighter2, sleep = 0) :
     print("\n")
 
     if fighter1.hp > fighter2.hp :
-        tempfighter1.record = record(tempfighter1,"w")
-        tempfighter2.record = record(tempfighter2,"l")
+        tempfighter1.win += 1
+        tempfighter2.loss += 1
+
         print(fighter1.nickname, "won the fight!")
     else:
-        tempfighter2.record = record(tempfighter2,"w")
-        tempfighter1.record = record(tempfighter1,"l")
+        tempfighter2.win += 1
+        tempfighter1.loss += 1
+
         print(fighter2.nickname, "won the fight!")
     
     updateFighter(tempfighter1)
