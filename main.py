@@ -2,11 +2,58 @@ import random
 import sqlite3
 import time
 #import names
+from flask import Flask, request, Response
+#from flask_sqlalchemy import SQLAlchemy
+#from sqlalchemy.orm import DeclarativeBase
+
+#class Base(DeclarativeBase):
+#  pass
+
+#db = SQLAlchemy(model_class=Base)
+
+app = Flask(__name__)
+
+#app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+
+#db.init_app(app)
+
+from collections import namedtuple
+
+def namedtuple_factory(cursor, row):
+    fields = [column[0] for column in cursor.description]
+    cls = namedtuple("Row", fields)
+    return cls._make(row)
+
+def dict_factory(cursor, row):
+    fields = [column[0] for column in cursor.description]
+    return {key: value for key, value in zip(fields, row)}
+
+@app.post('/api/login')
+def login():
+    # This is a placeholder for the login logic
+    # In a real application, you would check the credentials against a database
+    # and return a token or session ID if successful
+    # For now, we'll just return a success message
+    request_data = request.get_json().get("email")
+    if (request_data == "mail@example.com") :
+        return {
+            "message": "Login successful!",
+            "mail": request_data
+        }
+    else :
+        return Response(response="Failed", status=401)
+
+@app.route('/api/fighter')
+def fighters():
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    cur.execute("SELECT * FROM Fighter")
+    tempArray = cur.fetchall()
+    return {"fighter": tempArray[0][0]}
 
 con = sqlite3.connect("database.db")
 cur = con.cursor()
-
-
 
 # Future Ideas
 #
@@ -86,6 +133,7 @@ def createNickname() :
 
 
 def createFighterNickname(nickname = None) :
+    names = "" # will fix this later
     if nickname is None :
         nickname = createNickname()
     out_nickname = f'{names.get_first_name()} "{nickname}" {names.get_last_name()}'
