@@ -15,9 +15,11 @@ const handleSubmit = async (e: any) => {
         email: e.target.email.value,
       }),
     })
-
-    const result = await response.json()
-    console.log("Success:", result)
+    if (response.ok) {
+      const result = await response.json()
+      console.log("Success:", result)
+      window.location.href = "/"
+    }
   } catch (error) {
     console.error("Error:", error)
   }
@@ -46,7 +48,7 @@ export function LoginForm({
             </a>
             <h1 className="text-xl font-bold">Welcome to FightSim</h1>
             <div className="text-center text-sm">
-              Sign in to FightSim using your email.
+              Sign in to your account using your email.
             </div>
           </div>
           <div className="flex flex-col gap-6">
