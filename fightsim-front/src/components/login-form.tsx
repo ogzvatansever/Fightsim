@@ -1,34 +1,41 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-
-const handleSubmit = async (e: any) => {
-  e.preventDefault()
-  
-  try {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: e.target.email.value,
-      }),
-    })
-    if (response.ok) {
-      const result = await response.json()
-      console.log("Success:", result)
-      window.location.href = "/"
-    }
-  } catch (error) {
-    console.error("Error:", error)
-  }
-}
+import { useAuth } from "@/utils/AuthProvider"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  
+  const auth = useAuth()
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault()
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: e.target.email.value,
+        }),
+      })
+      if (response.ok) {
+        auth.login({
+          email: e.target.email.value,
+          password: "",
+        })
+        const result = await response.json()
+        console.log("Success:", result)
+        //window.location.href = "/"
+      }
+    } catch (error) {
+      console.error("Error:", error)
+    }
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form onSubmit={handleSubmit}>

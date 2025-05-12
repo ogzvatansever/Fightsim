@@ -28,29 +28,75 @@ def dict_factory(cursor, row):
     fields = [column[0] for column in cursor.description]
     return {key: value for key, value in zip(fields, row)}
 
-@app.post('/api/login')
+@app.post("/api/login")
 def login():
     # This is a placeholder for the login logic
     # In a real application, you would check the credentials against a database
     # and return a token or session ID if successful
     # For now, we'll just return a success message
-    request_data = request.get_json().get("email")
-    if (request_data == "mail@example.com") :
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    cur.execute("SELECT * FROM User WHERE email = ?", (request.get_json().get("email"),))
+    tempArray = cur.fetchone()
+    if (tempArray) :
         return {
-            "message": "Login successful!",
-            "mail": request_data
+            "message": "Login successful!"
         }
     else :
         return Response(response="Failed", status=401)
 
-@app.route('/api/fighter')
+@app.get("/api/fighter")
 def fighters():
     con = sqlite3.connect("database.db")
     con.row_factory = dict_factory
     cur = con.cursor()
     cur.execute("SELECT * FROM Fighter")
     tempArray = cur.fetchall()
-    return {"fighter": tempArray[0][0]}
+    return {"fighter": tempArray}
+
+@app.get("/api/<email>/fighter")
+def userFighter(email) :
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    cur.execute("SELECT * FROM Fighter WHERE owner = ?", (email,))
+    tempArray = cur.fetchall()
+    if (tempArray) :
+        return {"fighter": tempArray}
+    else :
+        return Response(response="Failed", status=404)
+
+@app.get("/api/fighter/<nickname>")
+def fighter(nickname) :
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (nickname,))
+    tempArray = cur.fetchone()
+    if (tempArray) :
+        return tempArray
+    else :
+        return Response(response="Failed", status=404)
+
+@app.post("/api/fight")
+def apiFight():
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),))
+    tempArray1 = cur.fetchone()
+    print(tempArray1)
+    cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),))
+    tempArray2 = cur.fetchone()
+    print(tempArray2)
+    if (tempArray1 and tempArray2) :
+        fighter1 = Fighter(tempArray1.nickname, tempArray1.agility, tempArray1.strength, tempArray1.toughness, tempArray1.stamina, tempArray1.health, tempArray1[7])
+        fighter2 = Fighter(tempArray2[1], tempArray2[2], tempArray2[3], tempArray2[4], tempArray2[5], tempArray2[6],tempArray2[7])
+        simFight(fighter1, fighter2)
+        return {"message": "Fight completed!"}
+    else :
+        return Response(response="Failed", status=404)
 
 con = sqlite3.connect("database.db")
 cur = con.cursor()
@@ -250,6 +296,7 @@ def simFight(tempfighter1, tempfighter2, sleep = 0) :
     fighter1 = convertStats(tempfighter1)
     fighter2 = convertStats(tempfighter2)
     turn_counter = 0
+    outArray = []
     while fighter1.hp > 0 and fighter2.hp > 0 :
         turn_counter += 1
         fighter1.damage(calHit(fighter1, fighter2),fighter2)
@@ -265,16 +312,17 @@ def simFight(tempfighter1, tempfighter2, sleep = 0) :
         tempfighter1.win += 1
         tempfighter2.loss += 1
 
-        print(fighter1.nickname, "won the fight!")
+        outArray.append(fighter1.nickname, "won the fight!")
     else:
         tempfighter2.win += 1
         tempfighter1.loss += 1
 
-        print(fighter2.nickname, "won the fight!")
+        outArray.append(fighter2.nickname, "won the fight!")
     
     updateFighter(tempfighter1)
     updateFighter(tempfighter2)
-    print("The fight took", turn_counter, "turns.")
+    outArray.append("The fight took", turn_counter, "turns.")
+    return outArray
 
 
 
