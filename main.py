@@ -91,7 +91,7 @@ def apiFight():
     tempArray2 = cur.fetchone()
     print(tempArray2)
     if (tempArray1 and tempArray2) :
-        fighter1 = Fighter(tempArray1.nickname, tempArray1.agility, tempArray1.strength, tempArray1.toughness, tempArray1.stamina, tempArray1.health, tempArray1[7])
+        fighter1 = Fighter(tempArray1.nickname, tempArray1.agility, tempArray1.strength, tempArray1.toughness, tempArray1.stamina, tempArray1.health, 0) # will add win and loss later
         fighter2 = Fighter(tempArray2[1], tempArray2[2], tempArray2[3], tempArray2[4], tempArray2[5], tempArray2[6],tempArray2[7])
         simFight(fighter1, fighter2)
         return {"message": "Fight completed!"}
