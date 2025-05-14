@@ -85,8 +85,8 @@ def apiFight() :
     tempArray1 = DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),)).fetchone()
     tempArray2 = DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),)).fetchone()
     if (tempArray1 and tempArray2) :
-        fighter1 = Fighter(tempArray1["nickname"], tempArray1["agility"], tempArray1["strength"], tempArray1["toughness"], tempArray1["stamina"], tempArray1["health"], 0)
-        fighter2 = Fighter(tempArray2["nickname"], tempArray2["agility"], tempArray2["strength"], tempArray2["toughness"], tempArray2["stamina"], tempArray2["health"], 0)
+        fighter1 = Fighter(tempArray1["nickname"], tempArray1["agility"], tempArray1["strength"], tempArray1["toughness"], tempArray1["stamina"], tempArray1["health"], tempArray1["win"], tempArray1["loss"])
+        fighter2 = Fighter(tempArray2["nickname"], tempArray2["agility"], tempArray2["strength"], tempArray2["toughness"], tempArray2["stamina"], tempArray2["health"], tempArray2["win"], tempArray2["loss"])
         output = simFight(fighter1, fighter2)
         cur = DB()
         cur.execute("INSERT INTO Fight (data, fighter1, fighter2) VALUES (?,?,?)", (json.dumps(output), tempArray1["nickname"], tempArray2["nickname"],))
@@ -99,7 +99,7 @@ def apiFight() :
 #app.get("/api/fight")
 @app.get("/api/fight/<id>")
 def apiGetFight(id):
-    output = DB().execute("SELECT * FROM Fight WHERE id = ?", id).fetchone()
+    output = DB().execute("SELECT * FROM Fight WHERE id = :num", {"num": int(id)}).fetchone()
     if output :
         return {
             "message": "Fight fetched!",
@@ -223,8 +223,7 @@ def saveFighter(fighter) : #Creates a database entry for fighter
 
 
 def updateFighter(fighter) :
-    cur.execute("UPDATE Fighter SET nickname=?, agility=?, strength=?, toughness=?, stamina=?, health=?, win=?, loss=? WHERE nickname=?",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.win, fighter.loss, fighter.nickname))
-    con.commit()
+    DB().execute("UPDATE Fighter SET nickname=?, agility=?, strength=?, toughness=?, stamina=?, health=?, win=?, loss=? WHERE nickname=?",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.win, fighter.loss, fighter.nickname))
 
 
 
@@ -345,8 +344,8 @@ def simFight(tempfighter1, tempfighter2) :
 
         output["Logs"].append(fighter2.nickname+" won the fight!")
     
-    #updateFighter(tempfighter1)
-    #updateFighter(tempfighter2)
+    updateFighter(tempfighter1)
+    updateFighter(tempfighter2)
     output["Logs"].append("The fight took "+str(turn_counter)+" turns.")
     return output
 

@@ -62,7 +62,7 @@ export default function Fighter() {
             <Badge className="absolute right-1 top-1">{fighter.id}</Badge>
             <h1 className="text-4xl font-bold">{fighter.nickname}</h1>
             <div className="flex flex-row justify-center items-center">
-                <p className="text-amber-500 flex justify-center items-center mx-4">{fighter.star}<FaStar /></p><p>0-0</p>
+                <p className="text-amber-500 flex justify-center items-center mx-4">{fighter.star}<FaStar /></p><p>{fighter.win}-{fighter.loss}</p>
             </div>
             <div className="flex flex-row justify-center items-center">
                 <div className="flex w-1/6 justify-start">
@@ -102,14 +102,6 @@ export default function Fighter() {
                 </div>
                 <div className="flex w-5/6 justify-end">
                     <Progress value={fighter.health*10} className="bg-red-800"/>
-                </div>
-            </div>
-            <div className="flex w-full">
-                <div className="flex w-full justify-start">
-                    <p className=" bg-red-800 rounded-2xl px-4 text-white">Sema did 30 damage!</p>
-                </div>
-                <div className="flex w-full justify-end">
-                    <p className="bg-blue-800 rounded-2xl px-4 text-white">Oguz did 20 damage!</p>
                 </div>
             </div>
         </div>
