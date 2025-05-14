@@ -89,14 +89,12 @@ def apiFight() :
         fighter2 = Fighter(tempArray2["nickname"], tempArray2["agility"], tempArray2["strength"], tempArray2["toughness"], tempArray2["stamina"], tempArray2["health"], tempArray2["win"], tempArray2["loss"])
         output = simFight(fighter1, fighter2)
         cur = DB()
-        cur.execute("INSERT INTO Fight (data, fighter1, fighter2) VALUES (?,?,?)", (json.dumps(output), tempArray1["nickname"], tempArray2["nickname"],))
+        cur.execute("INSERT INTO Fight (data, fighter1, fighter2, winner) VALUES (?,?,?,?)", (json.dumps(output), tempArray1["nickname"], tempArray2["nickname"], output["Winner"]))
         return {
             "message": "Fight completed!",
             "id": cur.lastrowid,
         }
 
-
-#app.get("/api/fight")
 @app.get("/api/fight/<id>")
 def apiGetFight(id):
     output = DB().execute("SELECT * FROM Fight WHERE id = :num", {"num": int(id)}).fetchone()
@@ -110,8 +108,12 @@ def apiGetFight(id):
     else :
         return Response(response="Failed", status=404)
 
-#con = sqlite3.connect("database.db")
-#cur = con.cursor()
+@app.get("/api/fights/<nickname>")
+def apiGetFightersFights(nickname) :
+    return {
+        "message": "Fights fetched!",
+        "fights": DB().execute("SELECT * FROM Fight WHERE fighter1 = :num OR fighter2 = :num", {"num": nickname}).fetchall()
+    }
 
 @app.get("/api/test")
 def test() :
@@ -346,6 +348,7 @@ def simFight(tempfighter1, tempfighter2) :
     
     updateFighter(tempfighter1)
     updateFighter(tempfighter2)
+    output["Winner"] = fighter1.nickname if fighter1.hp > fighter2.hp else fighter2.nickname
     output["Logs"].append("The fight took "+str(turn_counter)+" turns.")
     return output
 

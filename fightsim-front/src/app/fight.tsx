@@ -85,7 +85,10 @@ export default function Fight() {
             <div className="flex flex-row justify-center items-center my-4 w-xl">
                 <div className="flex flex-col items-center flex-1">
                     <img src="/fighter.png" alt="Fighter" className="object-scale-down h-[256px]" />
-                    <div className="text-2xl font-bold mt-2 max-w-xs truncate text-center">
+                    <div
+                        className="text-2xl font-bold mt-2 max-w-xs truncate text-center hover:underline cursor-pointer"
+                        onClick={() => {window.location.href = `/fighter/${fighters[0]}`}}
+                            >
                         {fighters[0]}
                     </div>
                 </div>
@@ -94,7 +97,10 @@ export default function Fight() {
                 </div>
                 <div className="flex flex-col items-center flex-1">
                     <img src="/fighter.png" alt="Fighter" className="object-scale-down h-[256px]" />
-                    <div className="text-2xl font-bold mt-2 max-w-xs truncate text-center">
+                    <div
+                        className="text-2xl font-bold mt-2 max-w-xs truncate text-center hover:underline cursor-pointer"
+                        onClick={() => {window.location.href = `/fighter/${fighters[1]}`}}
+                        >
                         {fighters[1]}
                     </div>
                 </div>

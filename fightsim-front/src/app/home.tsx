@@ -27,6 +27,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import React, { useEffect, useState } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export default function Home() {
     const [fighters, setFighters] = useState([])
@@ -119,7 +127,17 @@ export default function Home() {
                 />
               </div>
             <div className="w-lg bg-secondary p-4 text-left">
-                
+                <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbPage>Profile</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
                 <h1 className="text-2xl font-bold">
                     Profile
                 </h1>
@@ -140,7 +158,7 @@ export default function Home() {
                             fighters.map((fighter: {nickname: string, star: number, win: number, loss: number}, index) => (
                                 <TableRow key={index}>
                                     <TableCell className="font-medium">
-                                        <Link to={`/fighter/${fighter.nickname}`} className="text-blue-600 hover:underline">
+                                        <Link to={`/fighter/${fighter.nickname}`} className="hover:underline">
                                             {fighter.nickname}
                                         </Link>
                                     </TableCell>
