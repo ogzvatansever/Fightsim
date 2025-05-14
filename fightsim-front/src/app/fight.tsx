@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { useParams } from "react-router"
+import { Progress } from "@/components/ui/progress"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,16 +10,32 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
+// Add this CSS in your global CSS or in a <style> tag:
+/*
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+.shake {
+  animation: shake 0.4s;
+}
+*/
 
 export default function Fight() {
     const params = useParams()
     const [fight, setFight] = useState<any>({})
     const [visibleLogs, setVisibleLogs] = useState(0)
     const logsEndRef = useRef<HTMLDivElement | null>(null)
-
-    // Store fighter names in state
     const [fighters, setFighters] = useState<string[]>(["Fighter1", "Fighter2"])
+    const [initialHealth, setInitialHealth] = useState<[number, number]>([100, 100])
+    const [health, setHealth] = useState<[number, number]>([100, 100])
+    const [shake, setShake] = useState<[boolean, boolean]>([false, false]);
 
+    // Fetch fight and set fighters
     const getFight = async () => {
         try {
             const response = await fetch("/api/fight/" + params.id, {
@@ -32,7 +49,6 @@ export default function Fight() {
                 throw new Error("Failed to fetch fighters")
             } else {
                 const json = await response.json()
-                // Set fighter names from response
                 setFighters([json.fighter1, json.fighter2])
                 return json
             }
@@ -41,6 +57,28 @@ export default function Fight() {
         }
     }
 
+    // Fetch starting health for both fighters from their API
+    useEffect(() => {
+        const fetchInitialHealth = async () => {
+            if (!fighters[0] || !fighters[1]) return;
+            try {
+                const [res1, res2] = await Promise.all([
+                    fetch(`/api/fighter/${encodeURIComponent(fighters[0])}`),
+                    fetch(`/api/fighter/${encodeURIComponent(fighters[1])}`)
+                ]);
+                const data1 = res1.ok ? await res1.json() : { health: 100 };
+                const data2 = res2.ok ? await res2.json() : { health: 100 };
+                setInitialHealth([100 + 10 * data1.health, 100 + 10 * data2.health]);
+                setHealth([100 + 10 * data1.health, 100 + 10 * data2.health]);
+            } catch {
+                setInitialHealth([100, 100]);
+                setHealth([100, 100]);
+            }
+        };
+        fetchInitialHealth();
+    }, [fighters[0], fighters[1]]);
+
+    // Fetch fight data on mount
     useEffect(() => {
         const fetchFight = async () => {
             const fight = await getFight()
@@ -49,12 +87,47 @@ export default function Fight() {
         fetchFight();
     }, [])
 
+    // Update health based on logs and initialHealth
+    useEffect(() => {
+        if (!fight.fight || !Array.isArray(fight.fight.Logs)) return;
+
+        let h1 = initialHealth[0];
+        let h2 = initialHealth[1];
+        let damaged: [boolean, boolean] = [false, false];
+
+        for (let i = 0; i < visibleLogs; i++) {
+            const log = fight.fight.Logs[i];
+            // Regex for: Attacker hit Target for X damage!
+            const match = log.match(/^(.*?) hit (.*?) for ([\d.]+) damage/i);
+            if (match) {
+                const target = match[2].trim();
+                const dmg = parseFloat(match[3]);
+                if (target === fighters[0]) {
+                    h1 = Math.max(0, h1 - dmg);
+                    if (i === visibleLogs - 1) damaged[0] = true;
+                }
+                if (target === fighters[1]) {
+                    h2 = Math.max(0, h2 - dmg);
+                    if (i === visibleLogs - 1) damaged[1] = true;
+                }
+            }
+        }
+        setHealth([h1, h2]);
+        setShake(damaged);
+
+        // Remove shake after animation
+        if (damaged[0] || damaged[1]) {
+            const timeout = setTimeout(() => setShake([false, false]), 400);
+            return () => clearTimeout(timeout);
+        }
+    }, [visibleLogs, fight, fighters, initialHealth]);
+
     // Reveal logs one by one every second
     useEffect(() => {
         if (fight.fight && Array.isArray(fight.fight.Logs) && visibleLogs < fight.fight.Logs.length) {
             const timeout = setTimeout(() => {
                 setVisibleLogs(visibleLogs + 1)
-            }, 500) // 1 second
+            }, 400)
             return () => clearTimeout(timeout)
         }
     }, [fight, visibleLogs])
@@ -84,24 +157,62 @@ export default function Fight() {
 
             <div className="flex flex-row justify-center items-center my-4 w-xl">
                 <div className="flex flex-col items-center flex-1">
-                    <img src="/fighter.png" alt="Fighter" className="object-scale-down h-[256px]" />
+                    <img
+                        src="/fighter.png"
+                        alt="Fighter"
+                        className={`object-scale-down h-[256px] ${(health[0] <= 0) ? "grayscale" : ""}`}
+                    />
                     <div
                         className="text-2xl font-bold mt-2 max-w-xs truncate text-center hover:underline cursor-pointer"
                         onClick={() => {window.location.href = `/fighter/${fighters[0]}`}}
-                            >
+                    >
                         {fighters[0]}
+                    </div>
+                    {/* Health bar for fighter 1 */}
+                    <div className={`w-full mt-2 ${shake[0] ? "shake" : ""}`}>
+                        <Progress
+                            value={health[0]}
+                            variant="health"
+                            className={
+                                health[0] / 200 > 0.6
+                                    ? "bg-green-500"
+                                    : health[0] / 200 > 0.3
+                                    ? "bg-yellow-400"
+                                    : "bg-red-600"
+                            }
+                        />
+                        <div className="text-center text-xs mt-1">{health[0]} / {initialHealth[0]}</div>
                     </div>
                 </div>
                 <div className="flex flex-col items-center flex-1">
                     <h1 className="text-3xl font-bold mb-2 mx-6">vs</h1>
                 </div>
                 <div className="flex flex-col items-center flex-1">
-                    <img src="/fighter.png" alt="Fighter" className="object-scale-down h-[256px]" />
+                    <img
+                        src="/fighter.png"
+                        alt="Fighter"
+                        className={`object-scale-down h-[256px] ${(health[1] <= 0) ? "grayscale" : ""}`}
+                    />
                     <div
                         className="text-2xl font-bold mt-2 max-w-xs truncate text-center hover:underline cursor-pointer"
                         onClick={() => {window.location.href = `/fighter/${fighters[1]}`}}
-                        >
+                    >
                         {fighters[1]}
+                    </div>
+                    {/* Health bar for fighter 2 */}
+                    <div className={`w-full mt-2 ${shake[1] ? "shake" : ""}`}>
+                        <Progress
+                            value={health[1]}
+                            variant="health"
+                            className={
+                                health[1] / 200 > 0.6
+                                    ? "bg-green-500"
+                                    : health[1] / 200 > 0.3
+                                    ? "bg-yellow-400"
+                                    : "bg-red-600"
+                            }
+                        />
+                        <div className="text-center text-xs mt-1">{health[1]} / {initialHealth[1]}</div>
                     </div>
                 </div>
             </div>
