@@ -82,25 +82,37 @@ def fighter(nickname) :
 @app.post("/api/fight")
 def apiFight():
     con = sqlite3.connect("database.db")
-    con.row_factory = dict_factory
+    con.row_factory = namedtuple_factory
     cur = con.cursor()
     cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),))
     tempArray1 = cur.fetchone()
-    print(tempArray1)
     cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),))
     tempArray2 = cur.fetchone()
-    print(tempArray2)
+    DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),)).fetchone()
+    DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),)).fetchone()
     if (tempArray1 and tempArray2) :
         fighter1 = Fighter(tempArray1.nickname, tempArray1.agility, tempArray1.strength, tempArray1.toughness, tempArray1.stamina, tempArray1.health, 0) # will add win and loss later
         fighter2 = Fighter(tempArray2[1], tempArray2[2], tempArray2[3], tempArray2[4], tempArray2[5], tempArray2[6],tempArray2[7])
-        simFight(fighter1, fighter2)
-        return {"message": "Fight completed!"}
+        #simFight(fighter1, fighter2)
+        return {
+            "message": "Fight completed!",
+            "fight": simFight(fighter1, fighter2)
+            }
     else :
         return Response(response="Failed", status=404)
 
-con = sqlite3.connect("database.db")
-cur = con.cursor()
+#con = sqlite3.connect("database.db")
+#cur = con.cursor()
 
+@app.get("/api/test")
+def test() :
+    return {"message": DB().execute("SELECT * FROM Fighter").fetchall()}
+
+def DB() :
+    con = sqlite3.connect("database.db")
+    con.row_factory = dict_factory
+    cur = con.cursor()
+    return cur
 # Future Ideas
 #
 # Can split the record section the fighter database as Wins and Losses
@@ -160,10 +172,11 @@ class convertStats : # Converts character stats to in game stats
         self.win = infighter.win
         self.loss = infighter.loss
 
-    def damage(self, hit, target) :
+    def damage(self, hit, target, output = False) :
         if hit != 0 :
             target.hp -= hit
-            print(target.nickname,"took", int(hit), "damage.")
+            if output :
+                output["Logs"].append(self.nickname+" hit "+target.nickname+" for "+str(hit)+" damage!")
 
     def stats(self) :
         return self.crit,self.dodge,self.power,self.defence,self.energy,self.hp
@@ -258,27 +271,30 @@ def record(fighter,result) :
 
 
 
-def calHit(fighter1,fighter2) :
+def calHit(fighter1,fighter2, output = False) :
     if fighter1.energy >= 10 :
         fighter1.energy -= 10
 
         crit_cal = random.randint(1,100)
         if fighter1.crit*100 >= crit_cal :
-            print("Critical damage!")
+            if output :
+                output["Logs"].append(fighter1.nickname+" landed a critical hit!")
             fighter2.energy -= 30
             return 10*2*fighter1.power
         
         else :
             dodge_cal = random.randint(1,100)
             if fighter2.dodge*100 >= dodge_cal :
-                print(fighter2.nickname,"dodged the hit!")
+                if output :
+                    output["Logs"].append(fighter2.nickname+" dodged the hit!")
                 return 0
             
             else :
                 block_cal = random.randint(1,100)
                 if fighter2.defence*100 >= block_cal :
                     fighter2.energy += 15
-                    print("Hit blocked!")
+                    if output :
+                        output["Logs"].append(fighter2.nickname+" blocked the hit!")
                     return 10*0.2*fighter1.power
                 
                 else :
@@ -286,43 +302,42 @@ def calHit(fighter1,fighter2) :
                     return 10*fighter1.power
 
     else :
-        print(fighter1.nickname,"resting")
+        if output :
+            output["Logs"].append(fighter1.nickname+" is too tired to attack!")
         fighter1.energy += 15
         return 0
 
 
 
-def simFight(tempfighter1, tempfighter2, sleep = 0) :
+def simFight(tempfighter1, tempfighter2) :
     fighter1 = convertStats(tempfighter1)
     fighter2 = convertStats(tempfighter2)
     turn_counter = 0
-    outArray = []
+    output = {
+        "Logs": [],
+    }
     while fighter1.hp > 0 and fighter2.hp > 0 :
         turn_counter += 1
-        fighter1.damage(calHit(fighter1, fighter2),fighter2)
+        fighter1.damage(calHit(fighter1, fighter2, output),fighter2, output)
         fighter1.energy += 5
-        time.sleep(sleep)
-        fighter2.damage(calHit(fighter2, fighter1),fighter1)
+        fighter2.damage(calHit(fighter2, fighter1, output),fighter1, output)
         fighter2.energy += 5
-        time.sleep(sleep)
-
-    print("\n")
 
     if fighter1.hp > fighter2.hp :
         tempfighter1.win += 1
         tempfighter2.loss += 1
 
-        outArray.append(fighter1.nickname, "won the fight!")
+        output["Logs"].append(fighter1.nickname+" won the fight!")
     else:
         tempfighter2.win += 1
         tempfighter1.loss += 1
 
-        outArray.append(fighter2.nickname, "won the fight!")
+        output["Logs"].append(fighter2.nickname+" won the fight!")
     
-    updateFighter(tempfighter1)
-    updateFighter(tempfighter2)
-    outArray.append("The fight took", turn_counter, "turns.")
-    return outArray
+    #updateFighter(tempfighter1)
+    #updateFighter(tempfighter2)
+    output["Logs"].append("The fight took "+str(turn_counter)+" turns.")
+    return output
 
 
 
