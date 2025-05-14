@@ -2,7 +2,8 @@ import random
 import sqlite3
 import time
 #import names
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
+import json
 #from flask_sqlalchemy import SQLAlchemy
 #from sqlalchemy.orm import DeclarativeBase
 
@@ -80,23 +81,31 @@ def fighter(nickname) :
         return Response(response="Failed", status=404)
 
 @app.post("/api/fight")
-def apiFight():
-    con = sqlite3.connect("database.db")
-    con.row_factory = namedtuple_factory
-    cur = con.cursor()
-    cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),))
-    tempArray1 = cur.fetchone()
-    cur.execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),))
-    tempArray2 = cur.fetchone()
-    DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),)).fetchone()
-    DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),)).fetchone()
+def apiFight() :
+    tempArray1 = DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter1"),)).fetchone()
+    tempArray2 = DB().execute("SELECT * FROM Fighter WHERE nickname = ?", (request.get_json().get("fighter2"),)).fetchone()
     if (tempArray1 and tempArray2) :
-        fighter1 = Fighter(tempArray1.nickname, tempArray1.agility, tempArray1.strength, tempArray1.toughness, tempArray1.stamina, tempArray1.health, 0) # will add win and loss later
-        fighter2 = Fighter(tempArray2[1], tempArray2[2], tempArray2[3], tempArray2[4], tempArray2[5], tempArray2[6],tempArray2[7])
-        #simFight(fighter1, fighter2)
+        fighter1 = Fighter(tempArray1["nickname"], tempArray1["agility"], tempArray1["strength"], tempArray1["toughness"], tempArray1["stamina"], tempArray1["health"], 0)
+        fighter2 = Fighter(tempArray2["nickname"], tempArray2["agility"], tempArray2["strength"], tempArray2["toughness"], tempArray2["stamina"], tempArray2["health"], 0)
+        output = simFight(fighter1, fighter2)
+        cur = DB()
+        cur.execute("INSERT INTO Fight (data, fighter1, fighter2) VALUES (?,?,?)", (json.dumps(output), tempArray1["nickname"], tempArray2["nickname"],))
         return {
             "message": "Fight completed!",
-            "fight": simFight(fighter1, fighter2)
+            "id": cur.lastrowid,
+        }
+
+
+#app.get("/api/fight")
+@app.get("/api/fight/<id>")
+def apiGetFight(id):
+    output = DB().execute("SELECT * FROM Fight WHERE id = ?", id).fetchone()
+    if output :
+        return {
+            "message": "Fight fetched!",
+            "fight": json.loads(output["data"]),
+            "fighter1": output["fighter1"],
+            "fighter2": output["fighter2"]
             }
     else :
         return Response(response="Failed", status=404)
@@ -108,10 +117,12 @@ def apiFight():
 def test() :
     return {"message": DB().execute("SELECT * FROM Fighter").fetchall()}
 
-def DB() :
-    con = sqlite3.connect("database.db")
+def DB(option = False) :
+    con = sqlite3.connect("database.db", isolation_level=None)
     con.row_factory = dict_factory
     cur = con.cursor()
+    #if option == True :
+    #    return con, cur
     return cur
 # Future Ideas
 #

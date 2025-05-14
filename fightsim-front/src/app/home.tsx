@@ -16,7 +16,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 import {
   Table,
   TableBody,
@@ -26,13 +26,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useEffect, useState } from "react";
-
+import React, { useEffect, useState } from "react";
 
 export default function Home() {
     const [fighters, setFighters] = useState([])
+    const [selected, setSelected] = useState<string[]>([])
     const user = JSON.parse(localStorage.getItem("user") || JSON.stringify({email: "User"})).email
     console.log(user)
+    const navigate = useNavigate();
 
     const getFighters = async () => {
         try {
@@ -47,6 +48,37 @@ export default function Home() {
             return json.fighter
         } catch (error) {
             console.error("Error:", error)
+        }
+    }
+
+    const handleSelect = (nickname: string) => {
+        setSelected(prev => {
+            if (prev.includes(nickname)) {
+                return prev.filter(n => n !== nickname)
+            } else if (prev.length < 2) {
+                return [...prev, nickname]
+            }
+            return prev
+        })
+    }
+
+    const handleFight = async () => {
+        if (selected.length !== 2) return
+        try {
+            const response = await fetch(`/api/fight`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ fighter1: selected[0], fighter2: selected[1] })
+            })
+            if (!response.ok) throw new Error("Fight failed")
+            const result = await response.json()
+            console.log(result)
+            setSelected([])
+            const fighters = await getFighters()
+            setFighters(fighters)
+            navigate(`/fight/${result.id}`) // <-- Go to /id
+        } catch (error) {
+            alert("Error: " + error)
         }
     }
 
@@ -100,20 +132,42 @@ export default function Home() {
                         <TableHead className="w-[400px]">Nickname</TableHead>
                         <TableHead>Record</TableHead>
                         <TableHead>Star</TableHead>
+                        <TableHead>Select</TableHead> {/* New column */}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {
                             fighters.map((fighter: {nickname: string, star: number, win: number, loss: number}, index) => (
-                                <TableRow key={index} onClick={() => {window.location.href = "/fighter/"+fighter.nickname}} className="cursor-pointer hover:bg-background">
-                                <TableCell className="font-medium">{fighter.nickname}</TableCell>
-                                <TableCell>{fighter.win}-{fighter.loss}</TableCell>
-                                <TableCell>{fighter.star}</TableCell>
+                                <TableRow key={index}>
+                                    <TableCell className="font-medium">
+                                        <Link to={`/fighter/${fighter.nickname}`} className="text-blue-600 hover:underline">
+                                            {fighter.nickname}
+                                        </Link>
+                                    </TableCell>
+                                    <TableCell>{fighter.win}-{fighter.loss}</TableCell>
+                                    <TableCell>{fighter.star}</TableCell>
+                                    <TableCell>
+                                        <input
+                                            type="checkbox"
+                                            checked={selected.includes(fighter.nickname)}
+                                            disabled={
+                                                !selected.includes(fighter.nickname) && selected.length >= 2
+                                            }
+                                            onChange={() => handleSelect(fighter.nickname)}
+                                        />
+                                    </TableCell>
                                 </TableRow>
                             ))
                         }
                     </TableBody>
                 </Table>
+                <button
+                    className="mt-4 px-4 py-2 bg-primary text-white rounded disabled:opacity-50"
+                    disabled={selected.length !== 2}
+                    onClick={handleFight}
+                >
+                    Fight!
+                </button>
             </div>
         </div>
         </>

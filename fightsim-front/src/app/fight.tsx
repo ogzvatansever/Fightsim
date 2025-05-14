@@ -1,39 +1,46 @@
 import { useState, useEffect, useRef } from "react"
+import { useParams } from "react-router"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
 
 export default function Fight() {
+    const params = useParams()
     const [fight, setFight] = useState<any>({})
     const [visibleLogs, setVisibleLogs] = useState(0)
-    const fighters = [
-        "Mary \"The Show\" Shupe",
-        "Sharon \"The Cheer\" Rivera",
-    ]
     const logsEndRef = useRef<HTMLDivElement | null>(null)
+
+    // Store fighter names in state
+    const [fighters, setFighters] = useState<string[]>(["Fighter1", "Fighter2"])
 
     const getFight = async () => {
         try {
-            const response = await fetch("/api/fight", {
-                method: "POST",
+            const response = await fetch("/api/fight/" + params.id, {
+                method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                 },
-                body: JSON.stringify({
-                    "fighter1": fighters[0],
-                    "fighter2": fighters[1],
-                }),
-
             })
             if (!response.ok) {
                 throw new Error("Failed to fetch fighters")
             } else {
                 const json = await response.json()
-                console.log(json)
+                // Set fighter names from response
+                setFighters([json.fighter1, json.fighter2])
                 return json
             }
         } catch (error) {
             console.error("Error:", error)
         }
     }
+
     useEffect(() => {
         const fetchFight = async () => {
             const fight = await getFight()
@@ -59,6 +66,22 @@ export default function Fight() {
 
     return (
         <div className="flex flex-col justify-center items-center h-screen mx-2">
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbLink href="/Home">Profile</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                    <BreadcrumbPage>Fight</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
+
             <div className="flex flex-row justify-center items-center my-4 w-xl">
                 <div className="flex flex-col items-center flex-1">
                     <img src="/fighter.png" alt="Fighter" className="object-scale-down h-[256px]" />
