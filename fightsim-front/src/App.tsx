@@ -7,13 +7,11 @@ import { BrowserRouter, Routes, Route } from 'react-router';
 import ProtectedRoutes from "./utils/ProtectedRoutes"
 import Home from "@/app/home"
 import AuthProvider from "./utils/AuthProvider"
-import { useAuth } from "./utils/AuthProvider"
 import Fighter from "@/app/fighter"
 import Fight from "@/app/fight"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 
 function App() {
-  const auth = useAuth();
 
   const test = () => {
     localStorage.removeItem("user")
@@ -26,7 +24,6 @@ function App() {
 
   // For animation
   const [animatedBar, setAnimatedBar] = useState(0);
-  const prevXp = useRef(0);
 
   useEffect(() => {
     let isCancelled = false;

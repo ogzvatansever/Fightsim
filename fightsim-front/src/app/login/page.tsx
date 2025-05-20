@@ -1,5 +1,4 @@
 import { LoginForm } from "@/components/login-form"
-import { Navigate } from "react-router"
 
 export default function LoginPage() {
   return (

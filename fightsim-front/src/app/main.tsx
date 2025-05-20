@@ -1,6 +1,4 @@
 import { Card } from "@/components/ui/card";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
-import { Link } from "react-router";
 {/*
     This page is temporary, work in progress.
     Will use the other page till its ready
