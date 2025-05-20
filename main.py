@@ -201,11 +201,12 @@ def DB(option = False) :
 #        con.close()
 
 def createTable() :
+    pass
     #cur.execute("CREATE TABLE Nicknames (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, firstname varchar, lastname varchar, fullname varchar)")
     #cur.execute("DROP TABLE Nicknames")
     #cur.execute("DROP TABLE Fighter")
     #cur.execute("CREATE TABLE Fighter (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname varchar, agility int, strength int, toughness int, stamina int, health int, record varchar, star int)")
-    con.commit()
+    #con.commit()
 
 class Fighter :
 
@@ -267,8 +268,7 @@ def createFighterNickname(nickname = None) :
     if nickname is None :
         nickname = createNickname()
     out_nickname = f'{names.get_first_name()} "{nickname}" {names.get_last_name()}'
-    cur.execute("SELECT EXISTS (SELECT 1 FROM Fighter WHERE nickname = ? LIMIT 1)", (out_nickname,))
-    curcheck = cur.fetchone()
+    curcheck = DB("SELECT EXISTS (SELECT 1 FROM Fighter WHERE nickname = ? LIMIT 1)", (out_nickname,)).execute().fetchone()
     if curcheck[0] == 1 :
         createFighterNickname(nickname)
     else :
@@ -277,8 +277,7 @@ def createFighterNickname(nickname = None) :
 
 
 def saveFighter(fighter) : #Creates a database entry for fighter
-    cur.execute("INSERT INTO Fighter (nickname, agility, strength, toughness, stamina, health, star, win, loss) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.star, fighter.win, fighter.loss))
-    con.commit()
+    DB().execute("INSERT INTO Fighter (nickname, agility, strength, toughness, stamina, health, star, win, loss) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",(fighter.nickname, fighter.agility, fighter.strength, fighter.toughness, fighter.stamina, fighter.health, fighter.star, fighter.win, fighter.loss))
 
 
 
@@ -417,8 +416,7 @@ def simRound() :
     pass
 
 def pullFighter() :
-    cur.execute("SELECT * FROM Fighter ORDER BY RANDOM() LIMIT 1")
-    tempArray = cur.fetchall()
+    tempArray = DB().execute("SELECT * FROM Fighter ORDER BY RANDOM() LIMIT 1").fetchall()
     return Fighter(tempArray[0][1], tempArray[0][2], tempArray[0][3], tempArray[0][4], tempArray[0][5], tempArray[0][6],tempArray[0][7])
 
 if __name__ == "__main__" :
