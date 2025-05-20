@@ -98,8 +98,8 @@ export default function Fighter() {
 
     return (
         <div className="flex justify-center items-center h-screen">
-        <div className="flex flex-col justify-center px-4 py-8 bg-secondary w-xl rounded-4xl relative min-h-[600px]">
-            <Breadcrumb>
+        <div className="flex flex-col justify-center px-4 py-8 bg-secondary w-md rounded-4xl relative min-h-[600px]">
+            <Breadcrumb className="absolute top-4 left-1">
                 <BreadcrumbList>
                     <BreadcrumbItem>
                     <BreadcrumbLink href="/">Home</BreadcrumbLink>
@@ -114,7 +114,17 @@ export default function Fighter() {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
+            {/*
             <img src="/fighter.png" alt="Fighter" className="object-scale-down h-[256px]"/>
+            */}
+            <div className="flex justify-center items-center" style={{ minHeight: 280 }}>
+                <img
+                    src="/fighter.png"
+                    alt="Fighter"
+                    className="object-contain max-h-64 max-w-full"
+                    style={{ display: "block" }}
+                />
+            </div>
             <Badge className="absolute right-1 top-1">{fighter.id}</Badge>
             <h1 className="text-4xl font-bold">{fighter.nickname}</h1>
             <div className="flex flex-row justify-center items-center">
@@ -161,7 +171,7 @@ export default function Fighter() {
                 </div>
             </div>
             {/* Last Fights Table */}
-            <div className="mt-8">
+            <div className="mt-8 max-h-[200px] overflow-y-auto">
                 <h2 className="text-2xl font-semibold mb-2">Last Fights</h2>
                 <Table>
                     <TableHeader>

@@ -115,9 +115,67 @@ def apiGetFightersFights(nickname) :
         "fights": DB().execute("SELECT * FROM Fight WHERE fighter1 = :num OR fighter2 = :num", {"num": nickname}).fetchall()
     }
 
+@app.get("/api/fights/delete")
+def apiDeleteFights() :
+    DB().execute("UPDATE Fighter SET win = 0, loss = 0")
+    DB().execute("DELETE FROM Fight")
+    return {
+        "message": "Fights deleted!",
+    }
+
+@app.get("/api/fighter/delete_ownership")
+def apiDeleteFighterOwnership() :
+    DB().execute("UPDATE Fighter SET owner = ''")
+    return {
+        "message": "Fighter ownership deleted!",
+    }
+
+@app.get("/api/user/<email>/xp")
+def apiGetUserXP(email) :
+    return {
+         "message": "XP fetched!",
+        "xp": DB().execute("SELECT * FROM User WHERE email = ?", (email,)).fetchone()["xp"]
+    }
+
+@app.post("/api/user/<email>/xp/collect")
+def apiCollectUserXP(email) :
+    userXP = DB().execute("SELECT * FROM User WHERE email = ?", (email,)).fetchone()["xp"]
+    for i in range(1, int(userXP) // 100 + 1) :
+        collectFighter(email)
+    return {
+        "message": "XP collected!",
+    }
+
+@app.post("/api/user/<email>/xp/add")
+def apiAddUserXP(email) :
+    request_data = request.get_json()
+    xp = request_data.get("xp")
+    if xp is not None :
+        DB().execute("UPDATE User SET xp = xp + ? WHERE email = ?", (xp, email))
+        return {
+            "message": "XP added!",
+            "xp": DB().execute("SELECT * FROM User WHERE email = ?", (email,)).fetchone()["xp"]
+        }
+
 @app.get("/api/test")
 def test() :
     return {"message": DB().execute("SELECT * FROM Fighter").fetchall()}
+
+def collectFighter(email) :
+    curFighter = DB().execute("SELECT * FROM Fighter WHere owner IS NULL OR owner = '' ORDER BY RANDOM() LIMIT 1").fetchone()
+    if curFighter :
+        DB().execute("UPDATE Fighter SET owner = ? WHERE id = ?", (email, curFighter["id"]))
+        DB().execute("UPDATE User SET xp = xp - 100 WHERE email = ?", (email,))
+        return {
+            "message": "Fighter collected!",
+            "fighter": curFighter
+        }
+    else :
+        print("No fighters available!")
+        return {
+            "message": "No fighters available!"
+        }
+
 
 def DB(option = False) :
     con = sqlite3.connect("database.db", isolation_level=None)

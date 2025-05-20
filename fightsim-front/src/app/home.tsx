@@ -35,6 +35,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Terminal } from "lucide-react"
+
 
 export default function Home() {
     const [fighters, setFighters] = useState([])
@@ -46,16 +49,17 @@ export default function Home() {
     const getFighters = async () => {
         try {
             const response = await fetch(`/api/${user}/fighter`, {
-            method: "GET"
+                method: "GET"
             })
             if (!response.ok) {
                 throw new Error("Failed to fetch fighters")
             }
             const json = await response.json()
-            console.log(json.fighter)
-            return json.fighter
+            // Always return an array, even if undefined/null
+            return json.fighter ?? [];
         } catch (error) {
             console.error("Error:", error)
+            return [];
         }
     }
 
@@ -89,6 +93,17 @@ export default function Home() {
             alert("Error: " + error)
         }
     }
+
+    const isFightDisabled = selected.length !== 2;
+
+    const handleFightClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (isFightDisabled) {
+            e.preventDefault();
+            alert("Please select exactly 2 fighters to start a fight!");
+            return;
+        }
+        handleFight();
+    };
 
     useEffect(() => {
         const fetchFighters = async () => {
@@ -126,7 +141,7 @@ export default function Home() {
                   className="h-24 w-24 rounded-full m-5"
                 />
               </div>
-            <div className="w-lg bg-secondary p-4 text-left">
+            <div className="w-sm sm:w-xl bg-secondary p-4 text-left">
                 <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -154,17 +169,27 @@ export default function Home() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {
+                        {fighters.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center">
+                                    No fighters found.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
                             fighters.map((fighter: {nickname: string, star: number, win: number, loss: number}, index) => (
-                                <TableRow key={index}>
+                                <TableRow
+                                    key={index}
+                                    className="cursor-pointer"
+                                    onClick={() => handleSelect(fighter.nickname)}
+                                >
                                     <TableCell className="font-medium">
-                                        <Link to={`/fighter/${fighter.nickname}`} className="hover:underline">
+                                        <Link to={`/fighter/${fighter.nickname}`} className="hover:underline" onClick={e => e.stopPropagation()}>
                                             {fighter.nickname}
                                         </Link>
                                     </TableCell>
                                     <TableCell>{fighter.win}-{fighter.loss}</TableCell>
                                     <TableCell>{fighter.star}</TableCell>
-                                    <TableCell>
+                                    <TableCell onClick={e => e.stopPropagation()}>
                                         <input
                                             type="checkbox"
                                             checked={selected.includes(fighter.nickname)}
@@ -176,13 +201,12 @@ export default function Home() {
                                     </TableCell>
                                 </TableRow>
                             ))
-                        }
+                        )}
                     </TableBody>
                 </Table>
                 <button
-                    className="mt-4 px-4 py-2 bg-primary text-white rounded disabled:opacity-50"
-                    disabled={selected.length !== 2}
-                    onClick={handleFight}
+                    className={`fixed bottom-2 left-2 mt-4 px-4 py-2 bg-primary text-white dark:bg-red-800 dark:text-white rounded ${isFightDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                    onClick={handleFightClick}
                 >
                     Fight!
                 </button>
